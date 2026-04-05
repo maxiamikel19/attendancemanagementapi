@@ -9,6 +9,6 @@ public class ApiError {
 
     private int status;
     private String error;
-    private String message;
+    private Object message;
     private Long timestamp;
 }

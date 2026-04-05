@@ -85,7 +85,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private void validateDepartmentDoesNotExist(String name) {
         if (departmentRepository.existsByName(name)) {
-            throw new DuplicatedResourceException(name);
+            throw new DuplicatedResourceException("Department", name);
         }
     }
 
