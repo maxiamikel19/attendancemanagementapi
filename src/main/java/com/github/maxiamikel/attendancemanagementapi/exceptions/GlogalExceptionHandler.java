@@ -53,4 +53,28 @@ public class GlogalExceptionHandler {
                 .message(errors)
                 .build());
     }
+
+    @ExceptionHandler(ActiveTicketAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleActiveTicketAlreadyExistsException(ActiveTicketAlreadyExistsException ex) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.builder()
+                .error(ErrorCode.DUPLICATED_ERROR.name())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(System.currentTimeMillis())
+                .message(ex.getMessage())
+                .build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleOthersException(Exception ex) {
+
+        Map<String, String> error = new HashMap<>();
+        error.put("message", "Internal error, please contact to the system administrator");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.builder()
+                .error(ErrorCode.INTERNAL_SERVER_ERROR.name())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .timestamp(System.currentTimeMillis())
+                .message(error)
+                .build());
+    }
 }

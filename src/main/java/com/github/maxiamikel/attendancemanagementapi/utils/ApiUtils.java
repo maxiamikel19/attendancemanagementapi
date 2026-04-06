@@ -11,4 +11,30 @@ public final class ApiUtils {
         }
         return value.trim().toUpperCase();
     }
+
+    public static String maskPersonalId(String personalId) {
+        if (personalId == null || personalId.isBlank()) {
+            return null;
+        }
+
+        String value = personalId.trim();
+
+        String[] parts = value.split("-");
+
+        if (parts.length != 2) {
+            return "**";
+        }
+
+        String numberPart = parts[0];
+        String[] blocks = numberPart.split("\\.");
+
+        if (blocks.length < 3) {
+            return "**";
+        }
+
+        String middle = blocks[1] + "." + blocks[2];
+
+        return "***." + middle + "-**";
+    }
+
 }
