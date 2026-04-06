@@ -13,6 +13,7 @@ import com.github.maxiamikel.attendancemanagementapi.exceptions.DuplicatedResour
 import com.github.maxiamikel.attendancemanagementapi.exceptions.ResourceNotFoundException;
 import com.github.maxiamikel.attendancemanagementapi.repository.DepartmentRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
+import com.github.maxiamikel.attendancemanagementapi.utils.ApiUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Transactional
     public Department create(DepartmentRequest request) {
 
-        String normalizedName = normalizeName(request.getName());
+        String normalizedName = ApiUtils.normalizeStringToUpperCase(request.getName());
 
         validateDepartmentDoesNotExist(normalizedName);
 
@@ -42,7 +43,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department findByName(String name) {
 
-        String normalizedName = normalizeName(name);
+        String normalizedName = ApiUtils.normalizeStringToUpperCase(name);
 
         return departmentRepository.findByName(normalizedName)
                 .orElseThrow(() -> new ResourceNotFoundException("Department", normalizedName));
@@ -54,7 +55,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Department department = getById(id);
 
-        String normalizedName = normalizeName(request.getName());
+        String normalizedName = ApiUtils.normalizeStringToUpperCase(request.getName());
 
         if (departmentRepository.existsByNameAndIdNot(normalizedName, id)) {
             throw new DuplicatedResourceException("Department", normalizedName);
@@ -99,13 +100,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     private Department getById(UUID id) {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Department", id.toString()));
-    }
-
-    private String normalizeName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Department name cannot be null or empty");
-        }
-        return name.trim().toUpperCase();
     }
 
 }
