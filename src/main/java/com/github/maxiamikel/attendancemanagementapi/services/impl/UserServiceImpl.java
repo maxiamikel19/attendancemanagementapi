@@ -13,6 +13,7 @@ import com.github.maxiamikel.attendancemanagementapi.entity.User;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.DuplicatedResourceException;
 import com.github.maxiamikel.attendancemanagementapi.repository.UserRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
+import com.github.maxiamikel.attendancemanagementapi.services.NotificationService;
 import com.github.maxiamikel.attendancemanagementapi.services.RoleService;
 import com.github.maxiamikel.attendancemanagementapi.services.UserService;
 
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final DepartmentService departmentService;
     private final RoleService roleService;
+    private final NotificationService notificationService;
 
     @Override
     public User createAccount(UserRequest request) {
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
         User newUser = userRepository.save(user);
 
         // send email activación
+        notificationService.createActivationAccountNotification(newUser.getEmail());
 
         return newUser;
 
