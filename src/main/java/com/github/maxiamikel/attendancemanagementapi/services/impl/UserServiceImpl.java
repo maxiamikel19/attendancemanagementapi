@@ -11,6 +11,7 @@ import com.github.maxiamikel.attendancemanagementapi.entity.Department;
 import com.github.maxiamikel.attendancemanagementapi.entity.Role;
 import com.github.maxiamikel.attendancemanagementapi.entity.User;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.DuplicatedResourceException;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.ResourceNotFoundException;
 import com.github.maxiamikel.attendancemanagementapi.repository.UserRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
 import com.github.maxiamikel.attendancemanagementapi.services.NotificationService;
@@ -51,7 +52,11 @@ public class UserServiceImpl implements UserService {
         notificationService.createActivationAccountNotification(newUser.getEmail());
 
         return newUser;
+    }
 
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", email));
     }
 
     private void validateUserDoesNotExist(String email) {
@@ -79,4 +84,5 @@ public class UserServiceImpl implements UserService {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
 }

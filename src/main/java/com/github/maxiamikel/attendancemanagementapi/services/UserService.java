@@ -6,4 +6,6 @@ import com.github.maxiamikel.attendancemanagementapi.entity.User;
 public interface UserService {
 
     public User createAccount(UserRequest request);
+
+    public User findByEmail(String email);
 }
