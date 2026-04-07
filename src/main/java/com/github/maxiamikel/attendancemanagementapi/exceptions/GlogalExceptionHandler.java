@@ -54,8 +54,8 @@ public class GlogalExceptionHandler {
                 .build());
     }
 
-    @ExceptionHandler(ActiveTicketAlreadyExistsException.class)
-    public ResponseEntity<ApiError> handleActiveTicketAlreadyExistsException(ActiveTicketAlreadyExistsException ex) {
+    @ExceptionHandler(AlreadyActiveException.class)
+    public ResponseEntity<ApiError> handleActiveTicketAlreadyExistsException(AlreadyActiveException ex) {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.builder()
                 .error(ErrorCode.DUPLICATED_ERROR.name())
@@ -65,7 +65,7 @@ public class GlogalExceptionHandler {
                 .build());
     }
 
-    @ExceptionHandler(Exception.class)
+    // @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleOthersException(Exception ex) {
 
         Map<String, String> error = new HashMap<>();

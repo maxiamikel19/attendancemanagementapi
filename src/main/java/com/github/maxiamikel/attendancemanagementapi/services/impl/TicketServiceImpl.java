@@ -11,7 +11,7 @@ import com.github.maxiamikel.attendancemanagementapi.dto.request.TicketRequest;
 import com.github.maxiamikel.attendancemanagementapi.entity.Department;
 import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketStatus;
-import com.github.maxiamikel.attendancemanagementapi.exceptions.ActiveTicketAlreadyExistsException;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.AlreadyActiveException;
 import com.github.maxiamikel.attendancemanagementapi.repository.TicketRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentCounterService;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
@@ -84,7 +84,7 @@ public class TicketServiceImpl implements TicketService {
                 activeStatuses);
 
         if (exists) {
-            throw new ActiveTicketAlreadyExistsException(personalId, department.getName());
+            throw new AlreadyActiveException(personalId, department.getName());
         }
     }
 

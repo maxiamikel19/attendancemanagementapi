@@ -52,7 +52,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private String generateMessage(User user) {
-        String apiLink = apiBaseUrl + "/v1/users/activate-account?id=" + user.getId();
+        String apiLink = apiBaseUrl + "/v1/auth/activate-account?id=" + user.getId();
 
         String message = "<div style='background:#f1f1f1;padding:10px 20px;border-radius:10px;font-family:sans-serif'>"
                 +
