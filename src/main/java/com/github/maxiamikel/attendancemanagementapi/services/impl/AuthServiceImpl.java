@@ -2,13 +2,16 @@ package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
 import java.util.UUID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.maxiamikel.attendancemanagementapi.config.JwtService;
 import com.github.maxiamikel.attendancemanagementapi.dto.request.AuthRequest;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.AccessToken;
 import com.github.maxiamikel.attendancemanagementapi.entity.User;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.AlreadyActiveException;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.CredentialException;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.ResourceNotFoundException;
 import com.github.maxiamikel.attendancemanagementapi.repository.UserRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.AuthService;
@@ -22,10 +25,24 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public AccessToken login(AuthRequest request) {
-        return null;
+
+        User user = userRepository.findByEmailWithRoles(request.getEmail())
+                .orElseThrow(() -> new CredentialException("Invalid username or password"));
+
+        if (!user.isAccountActivated()) {
+            throw new CredentialException("Please, check your email and activate your account.");
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new CredentialException("Invalid username or password");
+        }
+
+        return jwtService.generateToken(user);
     }
 
     @Override

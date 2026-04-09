@@ -34,3 +34,6 @@ spring:
 api:  
   base: 
    url: http://localhost:8080
+  jwt-secret: mysuperlongsecuresecretkeythatshouldbeatleast64characterslong123456
+  jwt-expiration: 2592000000
+  jwt-issuer: ticket-api-issuer

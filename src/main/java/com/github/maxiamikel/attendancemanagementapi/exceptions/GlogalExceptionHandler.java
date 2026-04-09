@@ -46,9 +46,9 @@ public class GlogalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         });
 
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError.builder()
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError.builder()
                 .error(ErrorCode.VALIDATION_ERROR.name())
-                .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(System.currentTimeMillis())
                 .message(errors)
                 .build());
@@ -65,16 +65,13 @@ public class GlogalExceptionHandler {
                 .build());
     }
 
-    // @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleOthersException(Exception ex) {
-
-        Map<String, String> error = new HashMap<>();
-        error.put("message", "Internal error, please contact to the system administrator");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.builder()
-                .error(ErrorCode.INTERNAL_SERVER_ERROR.name())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+    @ExceptionHandler(CredentialException.class)
+    public ResponseEntity<ApiError> handleCredentialException(CredentialException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiError.builder()
+                .error(ErrorCode.UNAUTHORIZED_ERROR.name())
+                .status(HttpStatus.UNAUTHORIZED.value())
                 .timestamp(System.currentTimeMillis())
-                .message(error)
+                .message(ex.getMessage())
                 .build());
     }
 }
