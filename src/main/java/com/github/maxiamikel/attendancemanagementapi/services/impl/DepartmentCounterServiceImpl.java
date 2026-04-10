@@ -1,5 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@PreAuthorize("hasRole('ADMIN')")
 public class DepartmentCounterServiceImpl implements DepartmentCounterService {
 
     private final DepartmentCounterRepository departmentCounterRepository;

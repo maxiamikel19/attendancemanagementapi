@@ -1,5 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.github.maxiamikel.attendancemanagementapi.entity.Role;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;

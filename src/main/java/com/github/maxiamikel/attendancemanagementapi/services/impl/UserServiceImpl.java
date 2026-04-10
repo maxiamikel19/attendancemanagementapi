@@ -3,8 +3,10 @@ package com.github.maxiamikel.attendancemanagementapi.services.impl;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.request.UserRequest;
 import com.github.maxiamikel.attendancemanagementapi.entity.Department;
@@ -35,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private final NotificationService notificationService;
 
     @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public User createAccount(UserRequest request) {
 
         log.info("Registering user with email: {}", request.getEmail());

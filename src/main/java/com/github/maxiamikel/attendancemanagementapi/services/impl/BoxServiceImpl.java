@@ -3,6 +3,7 @@ package com.github.maxiamikel.attendancemanagementapi.services.impl;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasRole('ADMIN')")
 public class BoxServiceImpl implements BoxService {
 
     private final BoxRepository boxRepository;
