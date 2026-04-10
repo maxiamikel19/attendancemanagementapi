@@ -1,8 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.config;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,14 +12,14 @@ import org.springframework.stereotype.Service;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.response.AccessToken;
 import com.github.maxiamikel.attendancemanagementapi.entity.User;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.TokenJwtException;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class JwtService {
 
@@ -47,6 +45,35 @@ public class JwtService {
                 .compact();
 
         return new AccessToken(token);
+    }
+
+    public String getEmailFromToken(String token) {
+        try {
+            return Jwts
+                    .parser()
+                    .verifyWith(getKey())
+                    .requireIssuer(apiIssuer)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (Exception e) {
+            log.error("Access token error: {}", e.getMessage());
+            throw new TokenJwtException("Invalid token");
+        }
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getKey())
+                    .requireIssuer(apiIssuer)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 
     private Map<String, String> getclaims(User user) {

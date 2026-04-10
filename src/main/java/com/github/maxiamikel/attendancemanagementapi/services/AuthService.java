@@ -13,4 +13,6 @@ public interface AuthService {
     public User getCurrentUser();
 
     public void activateNewAccount(UUID id);
+
+    User findByEmail(String email);
 }
