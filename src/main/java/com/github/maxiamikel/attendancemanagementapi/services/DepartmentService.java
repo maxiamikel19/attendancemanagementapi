@@ -12,6 +12,8 @@ public interface DepartmentService {
 
     Department findByName(String name);
 
+    Department findById(UUID departmentId);
+
     Department update(DepartmentRequest request, UUID id);
 
     void delete(UUID id);

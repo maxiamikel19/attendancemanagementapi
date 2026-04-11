@@ -52,6 +52,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Department findById(UUID departmentId) {
+        return getById(departmentId);
+    }
+
+    @Override
     @Transactional
     public Department update(DepartmentRequest request, UUID id) {
 

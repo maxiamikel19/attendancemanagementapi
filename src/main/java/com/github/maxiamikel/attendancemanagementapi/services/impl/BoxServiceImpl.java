@@ -52,6 +52,11 @@ public class BoxServiceImpl implements BoxService {
     }
 
     @Override
+    public Box findById(UUID boxId) {
+        return getById(boxId);
+    }
+
+    @Override
     public Box update(BoxRequest request, UUID id) {
         Box box = getById(id);
 

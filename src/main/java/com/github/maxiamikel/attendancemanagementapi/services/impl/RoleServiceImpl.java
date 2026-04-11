@@ -1,5 +1,7 @@
 package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
+import java.util.UUID;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -20,5 +22,11 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role findByName(String roleName) {
         return roleRepository.findByName(roleName).orElseThrow(() -> new ResourceNotFoundException("Role", roleName));
+    }
+
+    @Override
+    public Role findById(UUID roleId) {
+        return roleRepository.findById(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", roleId.toString()));
     }
 }

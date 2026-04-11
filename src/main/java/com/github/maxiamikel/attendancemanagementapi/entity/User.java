@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.maxiamikel.attendancemanagementapi.enums.Gender;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.BusinessException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -74,5 +75,83 @@ public class User extends BaseEntity {
     public void activate() {
         this.active = true;
         this.emailVerified = true;
+    }
+
+    public void removeBox() {
+        if (this.box == null) {
+            throw new BusinessException("User has no assigned box");
+        }
+        this.box.unUseBox();
+        this.box = null;
+    }
+
+    public void assignBox(Box box) {
+
+        if (this.box != null) {
+            throw new BusinessException("User already has a box");
+        }
+
+        if (!box.isAvailable()) {
+            throw new BusinessException("Box is not available");
+        }
+        this.box = box;
+        box.useBox();
+    }
+
+    public void changeBox(Box newBox) {
+
+        if (this.box == null) {
+            throw new BusinessException("User has no assigned box");
+        }
+
+        if (this.box.equals(newBox))
+            return;
+
+        if (!newBox.isAvailable()) {
+            throw new BusinessException("Box is not available");
+        }
+
+        Box oldBox = this.box;
+        newBox.useBox();
+        this.box = newBox;
+        oldBox.unUseBox();
+    }
+
+    public void deactivate() {
+
+        if (!this.active) {
+            return;
+        }
+
+        if (this.box != null) {
+            this.box.unUseBox();
+            this.box = null;
+        }
+        this.active = false;
+    }
+
+    public void updateRoles(Set<Role> roles) {
+
+        if (roles == null || roles.isEmpty()) {
+            throw new BusinessException("User must have at least one role");
+        }
+        this.roles.clear();
+        this.roles.addAll(roles);
+    }
+
+    public void changeDepartment(Department newDepartment) {
+
+        if (newDepartment == null) {
+            throw new BusinessException("Department cannot be null");
+        }
+
+        if (this.box != null) {
+            throw new BusinessException("Cannot change department while user has assigned box");
+        }
+
+        if (this.department.equals(newDepartment))
+            return;
+
+        this.department = newDepartment;
     }
 }

@@ -11,6 +11,8 @@ public interface BoxService {
 
     Box findByBoxNumber(String boxNumber);
 
+    Box findById(UUID boxId);
+
     Box update(BoxRequest request, UUID id);
 
     void delete(UUID id);

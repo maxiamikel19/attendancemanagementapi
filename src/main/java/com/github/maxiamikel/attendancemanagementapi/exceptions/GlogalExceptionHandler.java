@@ -74,4 +74,14 @@ public class GlogalExceptionHandler {
                 .message(ex.getMessage())
                 .build());
     }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiError> handleBusinessException(BusinessException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()
+                .error(ErrorCode.INTERNAL_SERVER_ERROR.name())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .timestamp(System.currentTimeMillis())
+                .message(ex.getMessage())
+                .build());
+    }
 }

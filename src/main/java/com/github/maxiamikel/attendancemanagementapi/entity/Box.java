@@ -1,7 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.entity;
 
 import com.github.maxiamikel.attendancemanagementapi.enums.BoxStatus;
-import com.github.maxiamikel.attendancemanagementapi.exceptions.StatusException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,20 +35,6 @@ public class Box extends BaseEntity {
 
     public void unUseBox() {
         this.setStatus(BoxStatus.AVAILABLE);
-    }
-
-    public void assign() {
-        if (this.status == BoxStatus.NOT_AVAILABLE) {
-            throw new StatusException("Box is already assigned");
-        }
-        this.status = BoxStatus.NOT_AVAILABLE;
-    }
-
-    public void release() {
-        if (this.status == BoxStatus.AVAILABLE) {
-            throw new StatusException("Box is already available");
-        }
-        this.status = BoxStatus.AVAILABLE;
     }
 
     public boolean isAvailable() {
