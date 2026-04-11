@@ -25,13 +25,13 @@ public class TicketController {
     private final TicketService ticketService;
     private final TicketMapper ticketMapper;
 
-    @PostMapping("/generate")
+    @PostMapping
     public ResponseEntity<ApiResponse<TicketResponse>> generateTicket(@Valid @RequestBody TicketRequest request) {
-
         var ticket = ticketService.generateTicket(request);
-        var response = ticketMapper.toResponse(ticket);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseFactory.created(response));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponseFactory.created(ticketMapper.toResponse(ticket)));
     }
 
 }

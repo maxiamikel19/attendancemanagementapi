@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.maxiamikel.attendancemanagementapi.entity.Notification;
 import com.github.maxiamikel.attendancemanagementapi.enums.NotificationStatus;
+import com.github.maxiamikel.attendancemanagementapi.repository.DepartmentCounterRepository;
 import com.github.maxiamikel.attendancemanagementapi.repository.NotificationRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.EmailService;
 
@@ -23,6 +24,7 @@ public class ApiSchelduler {
 
     private final NotificationRepository notificationRepository;
     private final EmailService emailService;
+    private final DepartmentCounterRepository departmentCounterRepository;
 
     @Scheduled(fixedRate = 60000)
     @Transactional
@@ -50,5 +52,12 @@ public class ApiSchelduler {
             }
         }
 
+    }
+
+    @Scheduled(cron = "0 59 23 * * MON-SAT", zone = "America/Santiago")
+    @Transactional
+    void resetDepartmentCounter() {
+        int deleted = departmentCounterRepository.resetDepartmentCounter();
+        log.info("Deleting {} rows from department_counters table", deleted);
     }
 }

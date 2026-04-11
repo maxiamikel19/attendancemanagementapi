@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,88 +30,88 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-    private final UserMapper userMapper;
+        private final UserService userService;
+        private final UserMapper userMapper;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<UserResponse>> createAccount(@Valid @RequestBody UserRequest request) {
+        @PostMapping
+        public ResponseEntity<ApiResponse<UserResponse>> createAccount(@Valid @RequestBody UserRequest request) {
 
-        var user = userService.createAccount(request);
+                var user = userService.createAccount(request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponseFactory.created(userMapper.toResponse(user)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(ApiResponseFactory.created(userMapper.toResponse(user)));
+        }
 
-    @PutMapping("/{userId}/box/{boxId}")
-    public ResponseEntity<ApiResponse<UserResponse>> assignBox(@PathVariable UUID userId,
-            @PathVariable UUID boxId) {
+        @PutMapping("/{userId}/box/{boxId}")
+        public ResponseEntity<ApiResponse<UserResponse>> assignBox(@PathVariable UUID userId,
+                        @PathVariable UUID boxId) {
 
-        var user = userService.assignBox(userId, boxId);
+                var user = userService.assignBox(userId, boxId);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
+        }
 
-    @PutMapping("/{userId}/box/{boxId}/change")
-    public ResponseEntity<ApiResponse<UserResponse>> changeBox(@PathVariable UUID userId,
-            @PathVariable UUID boxId) {
+        @PutMapping("/{userId}/box/{boxId}/change")
+        public ResponseEntity<ApiResponse<UserResponse>> changeBox(@PathVariable UUID userId,
+                        @PathVariable UUID boxId) {
 
-        var user = userService.changeBox(userId, boxId);
+                var user = userService.changeBox(userId, boxId);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
+        }
 
-    @PutMapping("/{userId}/box")
-    public ResponseEntity<ApiResponse<UserResponse>> removeBox(@PathVariable("userId") UUID userId) {
+        @PutMapping("/{userId}/box")
+        public ResponseEntity<ApiResponse<UserResponse>> removeBox(@PathVariable("userId") UUID userId) {
 
-        var user = userService.removeBox(userId);
+                var user = userService.removeBox(userId);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
+        }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable("userId") UUID userId) {
+        @DeleteMapping("/{userId}")
+        public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable("userId") UUID userId) {
 
-        userService.deleteUser(userId);
+                userService.deleteUser(userId);
 
-        return ResponseEntity.noContent().build();
-    }
+                return ResponseEntity.noContent().build();
+        }
 
-    @PutMapping("/{userId}/role/{roleId}")
-    public ResponseEntity<ApiResponse<UserResponse>> changeRole(@PathVariable UUID userId,
-            @PathVariable UUID roleId) {
+        @PutMapping("/{userId}/role/{roleId}")
+        public ResponseEntity<ApiResponse<UserResponse>> changeRole(@PathVariable UUID userId,
+                        @PathVariable UUID roleId) {
 
-        var user = userService.changeRole(userId, roleId);
+                var user = userService.changeRole(userId, roleId);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
+        }
 
-    @PutMapping("/{userId}/department/{departmentId}")
-    public ResponseEntity<ApiResponse<UserResponse>> changeDepartment(@PathVariable UUID userId,
-            @PathVariable UUID departmentId) {
+        @PutMapping("/{userId}/department/{departmentId}")
+        public ResponseEntity<ApiResponse<UserResponse>> changeDepartment(@PathVariable UUID userId,
+                        @PathVariable UUID departmentId) {
 
-        var user = userService.changeDepartment(userId, departmentId);
+                var user = userService.changeDepartment(userId, departmentId);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(userMapper.toResponse(user)));
+        }
 
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        @GetMapping("/me")
+        public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(userMapper.toResponse(
-                        userService.findByEmail(authentication.getName()))));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(userMapper.toResponse(
+                                                userService.findByEmail(authentication.getName()))));
+        }
 }
