@@ -22,13 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasRole('ADMIN')")
+// @PreAuthorize("hasRole('ADMIN')")
 public class BoxServiceImpl implements BoxService {
 
     private final BoxRepository boxRepository;
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Box create(BoxRequest request) {
 
         String normalizerBoxNumber = ApiUtils.normalizeStringToUpperCase(request.getBoxNumber());
@@ -57,6 +58,7 @@ public class BoxServiceImpl implements BoxService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public Box update(BoxRequest request, UUID id) {
         Box box = getById(id);
 
@@ -76,6 +78,7 @@ public class BoxServiceImpl implements BoxService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(UUID id) {
         Box box = getById(id);
         boxRepository.delete(box);

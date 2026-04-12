@@ -22,13 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasRole('ADMIN')")
+// @PreAuthorize("hasRole('ADMIN')")
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Department create(DepartmentRequest request) {
 
         String normalizedName = ApiUtils.normalizeStringToUpperCase(request.getName());
@@ -58,6 +59,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Department update(DepartmentRequest request, UUID id) {
 
         Department department = getById(id);
@@ -77,6 +79,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(UUID id) {
 
         Department department = getById(id);
