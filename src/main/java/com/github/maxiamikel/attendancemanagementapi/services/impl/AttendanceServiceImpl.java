@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.request.TicketTransferRequest;
 import com.github.maxiamikel.attendancemanagementapi.entity.Box;
+import com.github.maxiamikel.attendancemanagementapi.entity.Department;
 import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
 import com.github.maxiamikel.attendancemanagementapi.entity.User;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketPriority;
@@ -35,28 +36,39 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         User operator = userService.fingById(userId);
 
-        this.validateOperator(operator);
-
-        this.ensureNoActiveTicket(operator);
+        validateOperator(operator);
+        ensureNoActiveTicket(operator);
 
         UUID departmentId = operator.getDepartment().getId();
 
-        var nextTicket = ticketRepository
-                .findNextTicketForUpdateSkipLocked(departmentId, TicketStatus.WAITING.name())
-                .orElseThrow(
-                        () -> new BusinessException("No found tickets available"));
+        Ticket ticket = ticketRepository
+                .callNextTicketAtomic(
+                        departmentId,
+                        TicketStatus.WAITING.name(),
+                        operator.getBox().getId())
+                .orElseThrow(() -> new BusinessException("No tickets available"));
 
-        nextTicket.assignBox(operator.getBox());
-        this.updateStatus(nextTicket, TicketStatus.CALLED);
+        log.info("Ticket {} taken by user {}", ticket.getPassCode(), operator.getName());
 
-        log.info("Ticket {} taken by user {}", nextTicket.getPassCode(), operator.getName());
-
-        return ticketRepository.save(nextTicket);
+        return ticket;
     }
 
     @Override
-    public Ticket callNextTicketByPriority(TicketPriority priority) {
-        return null;
+    public Ticket callNextTicketByPriority(TicketPriority priority, UUID userId) {
+
+        User operator = userService.fingById(userId);
+
+        validateOperator(operator);
+        ensureNoActiveTicket(operator);
+
+        Department department = operator.getDepartment();
+
+        return ticketRepository
+                .callNextTicketByPriority(
+                        department.getId(),
+                        priority.name(),
+                        operator.getBox().getId())
+                .orElseThrow(() -> new BusinessException("No tickets available"));
     }
 
     @Override

@@ -11,7 +11,7 @@ public interface AttendanceService {
 
     Ticket callNextTicket(UUID userId);
 
-    Ticket callNextTicketByPriority(TicketPriority priority);
+    Ticket callNextTicketByPriority(TicketPriority priority, UUID userId);
 
     Ticket cancelTicket();
 

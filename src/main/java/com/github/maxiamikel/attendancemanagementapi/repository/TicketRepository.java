@@ -23,22 +23,46 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     boolean existsActiveTicketForUser(String personalId, Department department, List<TicketStatus> activeStatuses);
 
     @Query(value = """
-                SELECT * FROM tickets t
-                WHERE t.department_id = :departmentId
-                AND t.ticket_status = :status
-                ORDER BY
-                    CASE
-                        WHEN t.ticket_priority = 'PRIORITY' THEN 0
-                        WHEN t.ticket_priority = 'NORMAL' THEN 1
-                        ELSE 2
-                    END,
-                    t.created_at ASC
-                FOR UPDATE SKIP LOCKED
-                LIMIT 1
+                UPDATE tickets
+                SET
+                    ticket_status = 'CALLED',
+                    box_id = :boxId,
+                    last_update = now()
+                WHERE id = (
+                    SELECT id FROM tickets t
+                    WHERE t.department_id = :departmentId
+                    AND t.ticket_status = :status
+                    ORDER BY
+                        CASE
+                            WHEN t.ticket_priority = 'PRIORITY' THEN 0
+                            WHEN t.ticket_priority = 'NORMAL' THEN 1
+                            ELSE 2
+                        END,
+                        t.created_at ASC
+                    LIMIT 1
+                    FOR UPDATE SKIP LOCKED
+                )
+                RETURNING *
             """, nativeQuery = true)
-    Optional<Ticket> findNextTicketForUpdateSkipLocked(
-            UUID departmentId,
-            String status);
+    Optional<Ticket> callNextTicketAtomic(UUID departmentId, String status, UUID boxId);
 
     boolean existsByBoxAndTicketStatusIn(Box box, List<TicketStatus> status);
+
+    @Query(value = """
+                UPDATE tickets
+                SET ticket_status = 'CALLED',
+                    box_id = :boxId,
+                    last_update = now()
+                WHERE id = (
+                    SELECT id FROM tickets
+                    WHERE department_id = :departmentId
+                      AND ticket_status = 'WAITING'
+                      AND ticket_priority = :priority
+                    ORDER BY created_at ASC
+                    LIMIT 1
+                    FOR UPDATE SKIP LOCKED
+                )
+                RETURNING *
+            """, nativeQuery = true)
+    Optional<Ticket> callNextTicketByPriority(UUID departmentId, String priority, UUID boxId);
 }
