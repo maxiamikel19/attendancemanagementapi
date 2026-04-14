@@ -25,13 +25,13 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class AttendanceServiceImpl implements AttendanceService {
 
     private final TicketRepository ticketRepository;
     private final UserService userService;
 
     @Override
+    @Transactional
     public Ticket callNextTicket(UUID userId) {
 
         User operator = userService.fingById(userId);
@@ -54,6 +54,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
     public Ticket callNextTicketByPriority(TicketPriority priority, UUID userId) {
 
         User operator = userService.fingById(userId);
@@ -72,22 +73,32 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public Ticket cancelTicket() {
+    public Ticket recallTicket(UUID userId) {
         return null;
     }
 
     @Override
-    public Ticket startTicket() {
-        return null;
+    @Transactional
+    public Ticket startTicket(UUID userId) {
+
+        User operator = userService.fingById(userId);
+
+        validateOperator(operator);
+
+        Box box = operator.getBox();
+
+        Ticket ticket = getTicketByBoxAndStatus(box, TicketStatus.CALLED);
+
+        updateStatus(ticket, TicketStatus.ATTENDING);
+
+        log.info("Ticket {} started attendance at box {}", ticket.getPassCode(),
+                box.getBoxNumber());
+
+        return ticketRepository.save(ticket);
     }
 
     @Override
-    public Ticket completeTicket() {
-        return null;
-    }
-
-    @Override
-    public Ticket recallTicket() {
+    public Ticket completeTicket(UUID userId) {
         return null;
     }
 
@@ -102,8 +113,21 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    public Ticket cancelTicket(UUID userId) {
+
+        return null;
+    }
+
+    @Override
     public List<Ticket> getAllWaitingAttendencesForDepartment() {
         return null;
+    }
+
+    private Ticket getTicketByBoxAndStatus(Box box, TicketStatus status) {
+
+        return ticketRepository
+                .findFirstByBoxAndTicketStatus(box, status)
+                .orElseThrow(() -> new BusinessException("No ticket with status " + status));
     }
 
     private User validateOperator(User user) {

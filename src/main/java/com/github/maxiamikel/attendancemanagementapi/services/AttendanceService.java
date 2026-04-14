@@ -13,17 +13,17 @@ public interface AttendanceService {
 
     Ticket callNextTicketByPriority(TicketPriority priority, UUID userId);
 
-    Ticket cancelTicket();
+    Ticket recallTicket(UUID userId);
 
-    Ticket startTicket();
+    Ticket startTicket(UUID userId);
 
-    Ticket completeTicket();
-
-    Ticket recallTicket();
+    Ticket completeTicket(UUID userId);
 
     Ticket getCurrentTicketTicket();
 
     Ticket transferTicket(TicketTransferRequest request);
+
+    Ticket cancelTicket(UUID userId);
 
     List<Ticket> getAllWaitingAttendencesForDepartment();
 }

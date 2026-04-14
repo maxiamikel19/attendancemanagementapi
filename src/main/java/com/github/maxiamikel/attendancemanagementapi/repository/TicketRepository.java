@@ -65,4 +65,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
                 RETURNING *
             """, nativeQuery = true)
     Optional<Ticket> callNextTicketByPriority(UUID departmentId, String priority, UUID boxId);
+
+    Optional<Ticket> findFirstByBoxAndTicketStatus(Box box, TicketStatus status);
 }
