@@ -52,22 +52,33 @@ public class AttendanceController {
     public ResponseEntity<ApiResponse<TicketDetailsResponse>> recallTicket(
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        var nextTicket = attendanceService.recallTicket(user.getId());
+        var waitted = attendanceService.recallTicket(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(waitted)));
     }
 
     @PostMapping("/start")
     public ResponseEntity<ApiResponse<TicketDetailsResponse>> startTicket(
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        var nextTicket = attendanceService.startTicket(user.getId());
+        var called = attendanceService.startTicket(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(called)));
+    }
+
+    @PostMapping("/finalize")
+    public ResponseEntity<ApiResponse<TicketDetailsResponse>> finalizeTicket(
+            @AuthenticationPrincipal CustomUserDetails user) {
+
+        var attended = attendanceService.finalizeTicket(user.getId());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
     }
 
 }

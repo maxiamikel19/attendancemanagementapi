@@ -17,7 +17,7 @@ public interface AttendanceService {
 
     Ticket startTicket(UUID userId);
 
-    Ticket completeTicket(UUID userId);
+    Ticket finalizeTicket(UUID userId);
 
     Ticket getCurrentTicketTicket();
 

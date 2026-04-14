@@ -91,7 +91,8 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Ticket cancelled = ticketRepository.save(ticket);
 
-        log.info("Ticket {} recalled at box {}", ticket.getPassCode(), operator.getBox().getBoxNumber());
+        log.info("Ticket {} recalled at box {} for {} times", ticket.getPassCode(), operator.getBox().getBoxNumber(),
+                cancelled.getRecallCount());
 
         return cancelled;
     }
@@ -121,8 +122,22 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public Ticket completeTicket(UUID userId) {
-        return null;
+    public Ticket finalizeTicket(UUID userId) {
+
+        User operator = userService.fingById(userId);
+
+        validateOperator(operator);
+
+        Box box = operator.getBox();
+
+        Ticket ticket = getTicketByBoxAndStatus(box, TicketStatus.ATTENDING);
+
+        updateStatus(ticket, TicketStatus.FINALIZED);
+
+        log.info("Ticket {} finished attendance at box {}", ticket.getPassCode(),
+                box.getBoxNumber());
+
+        return ticketRepository.save(ticket);
     }
 
     @Override
