@@ -139,6 +139,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    @Override
+    public User fingById(UUID userId) {
+        return getById(userId);
+    }
+
     private void validateUserDoesNotExist(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new DuplicatedResourceException("User already exists with email: " + email);
@@ -168,4 +173,5 @@ public class UserServiceImpl implements UserService {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
 }

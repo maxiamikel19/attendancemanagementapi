@@ -32,8 +32,9 @@ public class Ticket extends BaseEntity {
     @Column(name = "pass_code", unique = true, nullable = false)
     private String passCode;
 
-    @Column(name = "box")
-    private String box;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "box_id")
+    private Box box;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
@@ -55,5 +56,9 @@ public class Ticket extends BaseEntity {
     private int recallCount = 0;
 
     @Column(name = "last_update")
-    private LocalDateTime lastUpdated;
+    private LocalDateTime lastUpdate;
+
+    public void assignBox(Box box) {
+        this.box = box;
+    }
 }

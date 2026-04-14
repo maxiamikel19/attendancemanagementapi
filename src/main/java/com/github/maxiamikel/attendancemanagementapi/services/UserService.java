@@ -22,4 +22,6 @@ public interface UserService {
     User changeRole(UUID userId, UUID roleId);
 
     User changeDepartment(UUID userId, UUID departmentId);
+
+    public User fingById(UUID userId);
 }

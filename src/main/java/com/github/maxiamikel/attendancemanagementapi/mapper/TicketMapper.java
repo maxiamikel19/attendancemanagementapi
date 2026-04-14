@@ -2,6 +2,7 @@ package com.github.maxiamikel.attendancemanagementapi.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketDetailsResponse;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketResponse;
 import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
 import com.github.maxiamikel.attendancemanagementapi.utils.ApiUtils;
@@ -34,5 +35,21 @@ public class TicketMapper {
     private String getMaskPersonalId(String personalId) {
 
         return ApiUtils.maskPersonalId(personalId);
+    }
+
+    public TicketDetailsResponse toDetailsResponse(Ticket entity) {
+        String passCode = formatPassCode(entity.getPassCode());
+        return TicketDetailsResponse
+                .builder()
+                .id(entity.getId())
+                .box(entity.getBox().getBoxNumber())
+                .priority(entity.getPriority().name())
+                .ticketStatus(entity.getTicketStatus().name())
+                .lastUpdate(entity.getLastUpdate())
+                .department(entity.getDepartment().getName())
+                .passCode(passCode)
+                .personalId(getMaskPersonalId(entity.getPersonalId()))
+                .priority(entity.getPriority().name())
+                .build();
     }
 }
