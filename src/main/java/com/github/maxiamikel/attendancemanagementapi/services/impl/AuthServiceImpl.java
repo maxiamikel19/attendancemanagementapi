@@ -6,7 +6,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.github.maxiamikel.attendancemanagementapi.config.JwtService;
 import com.github.maxiamikel.attendancemanagementapi.dto.request.AuthRequest;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.AccessToken;
 import com.github.maxiamikel.attendancemanagementapi.entity.User;
@@ -14,6 +13,7 @@ import com.github.maxiamikel.attendancemanagementapi.exceptions.AlreadyActiveExc
 import com.github.maxiamikel.attendancemanagementapi.exceptions.CredentialException;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.ResourceNotFoundException;
 import com.github.maxiamikel.attendancemanagementapi.repository.UserRepository;
+import com.github.maxiamikel.attendancemanagementapi.security.JwtService;
 import com.github.maxiamikel.attendancemanagementapi.services.AuthService;
 
 import lombok.RequiredArgsConstructor;

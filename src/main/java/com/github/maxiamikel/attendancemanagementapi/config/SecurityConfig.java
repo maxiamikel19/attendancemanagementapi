@@ -1,5 +1,8 @@
 package com.github.maxiamikel.attendancemanagementapi.config;
 
+import com.github.maxiamikel.attendancemanagementapi.repository.UserRepository;
+import com.github.maxiamikel.attendancemanagementapi.security.JwtFilter;
+
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -9,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,6 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.github.maxiamikel.attendancemanagementapi.exceptions.CustomAuthenticationEntryPoint;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.CustonAccessDeniedHandler;
+import com.github.maxiamikel.attendancemanagementapi.services.impl.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private final UserRepository userRepository;
     private final JwtFilter jwtFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustonAccessDeniedHandler accessDeniedHandler;
@@ -66,5 +72,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new CustomUserDetailsService(userRepository);
     }
 }

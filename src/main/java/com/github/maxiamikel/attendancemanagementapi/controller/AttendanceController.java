@@ -2,8 +2,7 @@ package com.github.maxiamikel.attendancemanagementapi.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,12 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.response.ApiResponse;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketDetailsResponse;
-import com.github.maxiamikel.attendancemanagementapi.entity.User;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketPriority;
 import com.github.maxiamikel.attendancemanagementapi.mapper.ApiResponseFactory;
 import com.github.maxiamikel.attendancemanagementapi.mapper.TicketMapper;
+import com.github.maxiamikel.attendancemanagementapi.security.CustomUserDetails;
 import com.github.maxiamikel.attendancemanagementapi.services.AttendanceService;
-import com.github.maxiamikel.attendancemanagementapi.services.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,12 +25,12 @@ public class AttendanceController {
 
     private final AttendanceService attendanceService;
     private final TicketMapper ticketMapper;
-    private final UserService userService;
 
     @PostMapping("/next")
-    public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNext() {
+    public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNext(
+            @AuthenticationPrincipal CustomUserDetails user) {
 
-        var nextTicket = attendanceService.callNextTicket(getCurrentUser().getId());
+        var nextTicket = attendanceService.callNextTicket(user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -41,19 +39,13 @@ public class AttendanceController {
 
     @PostMapping("/next-by-priority")
     public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNextTicketByPriority(
-            @RequestParam TicketPriority priority) {
+            @RequestParam TicketPriority priority, @AuthenticationPrincipal CustomUserDetails user) {
 
-        var nextTicket = attendanceService.callNextTicketByPriority(priority, getCurrentUser().getId());
+        var nextTicket = attendanceService.callNextTicketByPriority(priority, user.getId());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
-    }
-
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        return userService.findByEmail(email);
     }
 
 }

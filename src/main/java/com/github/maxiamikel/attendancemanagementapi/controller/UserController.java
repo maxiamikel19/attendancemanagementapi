@@ -4,8 +4,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +19,7 @@ import com.github.maxiamikel.attendancemanagementapi.dto.response.ApiResponse;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.UserResponse;
 import com.github.maxiamikel.attendancemanagementapi.mapper.ApiResponseFactory;
 import com.github.maxiamikel.attendancemanagementapi.mapper.UserMapper;
+import com.github.maxiamikel.attendancemanagementapi.security.CustomUserDetails;
 import com.github.maxiamikel.attendancemanagementapi.services.UserService;
 
 import jakarta.validation.Valid;
@@ -106,12 +106,13 @@ public class UserController {
         }
 
         @GetMapping("/me")
-        public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+                        @AuthenticationPrincipal CustomUserDetails user) {
+
+                var currentUser = userService.fingById(user.getId());
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(userMapper.toResponse(
-                                                userService.findByEmail(authentication.getName()))));
+                                .body(ApiResponseFactory.success(userMapper.toResponse(currentUser)));
         }
 }

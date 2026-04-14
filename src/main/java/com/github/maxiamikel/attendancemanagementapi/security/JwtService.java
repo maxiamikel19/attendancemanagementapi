@@ -1,4 +1,4 @@
-package com.github.maxiamikel.attendancemanagementapi.config;
+package com.github.maxiamikel.attendancemanagementapi.security;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
