@@ -19,9 +19,9 @@ public interface AttendanceService {
 
     Ticket finalizeTicket(UUID userId);
 
-    Ticket getCurrentTicketTicket();
+    Ticket getCurrentTicketTicket(UUID userId);
 
-    Ticket transferTicket(TicketTransferRequest request);
+    Ticket transferTicket(TicketTransferRequest request, UUID userId);
 
     Ticket cancelTicket(UUID userId);
 

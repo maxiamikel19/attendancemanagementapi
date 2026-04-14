@@ -67,4 +67,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> callNextTicketByPriority(UUID departmentId, String priority, UUID boxId);
 
     Optional<Ticket> findFirstByBoxAndTicketStatus(Box box, TicketStatus status);
+
+    Optional<Ticket> findFirstByBoxAndTicketStatusIn(Box box, List<TicketStatus> status);
 }

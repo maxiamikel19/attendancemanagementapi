@@ -3,6 +3,7 @@ package com.github.maxiamikel.attendancemanagementapi.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,62 +24,73 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AttendanceController {
 
-    private final AttendanceService attendanceService;
-    private final TicketMapper ticketMapper;
+        private final AttendanceService attendanceService;
+        private final TicketMapper ticketMapper;
 
-    @PostMapping("/next")
-    public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNext(
-            @AuthenticationPrincipal CustomUserDetails user) {
+        @PostMapping("/next")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNext(
+                        @AuthenticationPrincipal CustomUserDetails user) {
 
-        var nextTicket = attendanceService.callNextTicket(user.getId());
+                var nextTicket = attendanceService.callNextTicket(user.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+        }
 
-    @PostMapping("/next-by-priority")
-    public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNextTicketByPriority(
-            @RequestParam TicketPriority priority, @AuthenticationPrincipal CustomUserDetails user) {
+        @PostMapping("/next-by-priority")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNextTicketByPriority(
+                        @RequestParam TicketPriority priority, @AuthenticationPrincipal CustomUserDetails user) {
 
-        var nextTicket = attendanceService.callNextTicketByPriority(priority, user.getId());
+                var nextTicket = attendanceService.callNextTicketByPriority(priority, user.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+        }
 
-    @PostMapping("/recall")
-    public ResponseEntity<ApiResponse<TicketDetailsResponse>> recallTicket(
-            @AuthenticationPrincipal CustomUserDetails user) {
+        @PostMapping("/recall")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> recallTicket(
+                        @AuthenticationPrincipal CustomUserDetails user) {
 
-        var waitted = attendanceService.recallTicket(user.getId());
+                var waitted = attendanceService.recallTicket(user.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(waitted)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(waitted)));
+        }
 
-    @PostMapping("/start")
-    public ResponseEntity<ApiResponse<TicketDetailsResponse>> startTicket(
-            @AuthenticationPrincipal CustomUserDetails user) {
+        @PostMapping("/start")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> startTicket(
+                        @AuthenticationPrincipal CustomUserDetails user) {
 
-        var called = attendanceService.startTicket(user.getId());
+                var called = attendanceService.startTicket(user.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(called)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(called)));
+        }
 
-    @PostMapping("/finalize")
-    public ResponseEntity<ApiResponse<TicketDetailsResponse>> finalizeTicket(
-            @AuthenticationPrincipal CustomUserDetails user) {
+        @PostMapping("/finalize")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> finalizeTicket(
+                        @AuthenticationPrincipal CustomUserDetails user) {
 
-        var attended = attendanceService.finalizeTicket(user.getId());
+                var attended = attendanceService.finalizeTicket(user.getId());
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
+        }
+
+        @GetMapping("/current")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> getCurrentTicketTicket(
+                        @AuthenticationPrincipal CustomUserDetails user) {
+
+                var attended = attendanceService.getCurrentTicketTicket(user.getId());
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
+        }
 
 }

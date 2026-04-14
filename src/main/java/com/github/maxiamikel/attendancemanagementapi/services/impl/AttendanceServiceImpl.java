@@ -141,12 +141,20 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public Ticket getCurrentTicketTicket() {
-        return null;
+    public Ticket getCurrentTicketTicket(UUID userId) {
+
+        User operator = userService.fingById(userId);
+        validateOperator(operator);
+        Box box = operator.getBox();
+        List<TicketStatus> status = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING);
+
+        return ticketRepository.findFirstByBoxAndTicketStatusIn(box, status)
+                .orElseThrow(() -> new BusinessException("You dont have any active ticket right now"));
+
     }
 
     @Override
-    public Ticket transferTicket(TicketTransferRequest request) {
+    public Ticket transferTicket(TicketTransferRequest request, UUID userId) {
         return null;
     }
 
