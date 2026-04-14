@@ -48,6 +48,17 @@ public class AttendanceController {
                 .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
     }
 
+    @PostMapping("/recall")
+    public ResponseEntity<ApiResponse<TicketDetailsResponse>> recallTicket(
+            @AuthenticationPrincipal CustomUserDetails user) {
+
+        var nextTicket = attendanceService.recallTicket(user.getId());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+    }
+
     @PostMapping("/start")
     public ResponseEntity<ApiResponse<TicketDetailsResponse>> startTicket(
             @AuthenticationPrincipal CustomUserDetails user) {

@@ -24,4 +24,5 @@ public class TicketDetailsResponse {
     private String priority;
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdate;
+    private int recallCount;
 }

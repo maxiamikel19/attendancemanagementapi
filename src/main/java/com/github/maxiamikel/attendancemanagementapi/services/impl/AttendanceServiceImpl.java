@@ -30,6 +30,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final TicketRepository ticketRepository;
     private final UserService userService;
 
+    private int MAX_RECALLS = 4;
+
     @Override
     @Transactional
     public Ticket callNextTicket(UUID userId) {
@@ -73,8 +75,29 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
     public Ticket recallTicket(UUID userId) {
-        return null;
+
+        User operator = userService.fingById(userId);
+        validateOperator(operator);
+
+        Ticket ticket = getTicketByBoxAndStatus(operator.getBox(), TicketStatus.CALLED);
+
+        incrementRecallCount(ticket);
+
+        if (ticket.getRecallCount() >= MAX_RECALLS) {
+            updateStatus(ticket, TicketStatus.CANCELLED);
+        }
+
+        Ticket cancelled = ticketRepository.save(ticket);
+
+        log.info("Ticket {} recalled at box {}", ticket.getPassCode(), operator.getBox().getBoxNumber());
+
+        return cancelled;
+    }
+
+    private void incrementRecallCount(Ticket ticket) {
+        ticket.setRecallCount(ticket.getRecallCount() + 1);
     }
 
     @Override

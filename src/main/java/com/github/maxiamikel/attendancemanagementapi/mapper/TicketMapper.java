@@ -50,6 +50,7 @@ public class TicketMapper {
                 .passCode(passCode)
                 .personalId(getMaskPersonalId(entity.getPersonalId()))
                 .priority(entity.getPriority().name())
+                .recallCount(entity.getRecallCount())
                 .build();
     }
 }
