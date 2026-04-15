@@ -177,8 +177,17 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public List<Ticket> getAllWaitingAttendencesForDepartment() {
-        return null;
+    public List<Ticket> getTicketsByStatus(UUID userId) {
+
+        User operator = userService.fingById(userId);
+        Department department = operator.getDepartment();
+
+        List<Ticket> waittings = ticketRepository.findByDepartmentAndTicketStatusOrderByCreatedAtAsc(department,
+                TicketStatus.WAITING);
+        if (waittings.isEmpty()) {
+            throw new BusinessException("No tickets for this department");
+        }
+        return waittings;
     }
 
     private Ticket getTicketByBoxAndStatus(Box box, TicketStatus status) {

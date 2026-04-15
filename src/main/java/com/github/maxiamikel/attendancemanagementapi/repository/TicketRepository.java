@@ -69,4 +69,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> findFirstByBoxAndTicketStatus(Box box, TicketStatus status);
 
     Optional<Ticket> findFirstByBoxAndTicketStatusIn(Box box, List<TicketStatus> status);
+
+    List<Ticket> findByDepartmentAndTicketStatusOrderByCreatedAtAsc(Department department, TicketStatus waiting);
 }

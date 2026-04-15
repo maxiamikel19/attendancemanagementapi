@@ -22,5 +22,5 @@ public interface AttendanceService {
 
     Ticket transferTicket(UUID departmentId, UUID userId);
 
-    List<Ticket> getAllWaitingAttendencesForDepartment();
+    List<Ticket> getTicketsByStatus(UUID userId);
 }

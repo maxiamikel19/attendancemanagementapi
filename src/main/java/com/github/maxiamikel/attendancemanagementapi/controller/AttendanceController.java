@@ -1,5 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,6 @@ public class AttendanceController {
         @PostMapping("/next")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNext(
                         @AuthenticationPrincipal CustomUserDetails user) {
-
                 var nextTicket = attendanceService.callNextTicket(getUserId(user));
 
                 return ResponseEntity
@@ -46,7 +46,6 @@ public class AttendanceController {
         @PostMapping("/next-by-priority")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNextTicketByPriority(
                         @RequestParam TicketPriority priority, @AuthenticationPrincipal CustomUserDetails user) {
-
                 var nextTicket = attendanceService.callNextTicketByPriority(priority, getUserId(user));
 
                 return ResponseEntity
@@ -57,7 +56,6 @@ public class AttendanceController {
         @PostMapping("/recall")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> recallTicket(
                         @AuthenticationPrincipal CustomUserDetails user) {
-
                 var waitted = attendanceService.recallTicket(getUserId(user));
 
                 return ResponseEntity
@@ -68,7 +66,6 @@ public class AttendanceController {
         @PostMapping("/start")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> startTicket(
                         @AuthenticationPrincipal CustomUserDetails user) {
-
                 var called = attendanceService.startTicket(getUserId(user));
 
                 return ResponseEntity
@@ -79,7 +76,6 @@ public class AttendanceController {
         @PostMapping("/finalize")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> finalizeTicket(
                         @AuthenticationPrincipal CustomUserDetails user) {
-
                 var attended = attendanceService.finalizeTicket(getUserId(user));
 
                 return ResponseEntity
@@ -90,7 +86,6 @@ public class AttendanceController {
         @GetMapping("/current")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> getCurrentTicketTicket(
                         @AuthenticationPrincipal CustomUserDetails user) {
-
                 var attended = attendanceService.getCurrentTicketTicket(getUserId(user));
 
                 return ResponseEntity
@@ -101,12 +96,22 @@ public class AttendanceController {
         @PatchMapping("/transfer/{departmentId}")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> transferTicket(
                         @AuthenticationPrincipal CustomUserDetails user, @PathVariable UUID departmentId) {
-
                 var attended = attendanceService.transferTicket(departmentId, getUserId(user));
 
                 return ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
+        }
+
+        @GetMapping("/tickets")
+        public ResponseEntity<ApiResponse<List<TicketDetailsResponse>>> getAllWaitingAttendencesForDepartment(
+                        @AuthenticationPrincipal CustomUserDetails user) {
+
+                var tickets = attendanceService.getTicketsByStatus(getUserId(user));
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(ticketMapper.toDetailsList(tickets)));
         }
 
         private UUID getUserId(CustomUserDetails user) {

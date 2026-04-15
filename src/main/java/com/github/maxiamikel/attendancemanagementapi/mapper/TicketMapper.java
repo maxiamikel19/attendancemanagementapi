@@ -1,5 +1,7 @@
 package com.github.maxiamikel.attendancemanagementapi.mapper;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketDetailsResponse;
@@ -42,7 +44,7 @@ public class TicketMapper {
         return TicketDetailsResponse
                 .builder()
                 .id(entity.getId())
-                .box(entity.getBox().getBoxNumber())
+                .box(entity.getBox() != null ? entity.getBox().getBoxNumber() : "")
                 .priority(entity.getPriority().name())
                 .ticketStatus(entity.getTicketStatus().name())
                 .lastUpdate(entity.getLastUpdate())
@@ -51,6 +53,15 @@ public class TicketMapper {
                 .personalId(getMaskPersonalId(entity.getPersonalId()))
                 .priority(entity.getPriority().name())
                 .recallCount(entity.getRecallCount())
+                .createdAt(entity.getCreatedAt())
+                .lastUpdate(entity.getLastUpdate())
                 .build();
+    }
+
+    public List<TicketDetailsResponse> toDetailsList(List<Ticket> tickets) {
+        return tickets
+                .stream()
+                .map(ticket -> toDetailsResponse(ticket))
+                .toList();
     }
 }
