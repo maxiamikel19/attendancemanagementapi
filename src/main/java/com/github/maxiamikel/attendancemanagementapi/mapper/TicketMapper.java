@@ -58,6 +58,13 @@ public class TicketMapper {
                 .build();
     }
 
+    public List<TicketResponse> toResponseList(List<Ticket> tickets) {
+        return tickets
+                .stream()
+                .map(ticket -> toResponse(ticket))
+                .toList();
+    }
+
     public List<TicketDetailsResponse> toDetailsList(List<Ticket> tickets) {
         return tickets
                 .stream()
