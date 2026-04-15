@@ -3,7 +3,6 @@ package com.github.maxiamikel.attendancemanagementapi.services;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.maxiamikel.attendancemanagementapi.dto.request.TicketTransferRequest;
 import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketPriority;
 
@@ -21,9 +20,7 @@ public interface AttendanceService {
 
     Ticket getCurrentTicketTicket(UUID userId);
 
-    Ticket transferTicket(TicketTransferRequest request, UUID userId);
-
-    Ticket cancelTicket(UUID userId);
+    Ticket transferTicket(UUID departmentId, UUID userId);
 
     List<Ticket> getAllWaitingAttendencesForDepartment();
 }

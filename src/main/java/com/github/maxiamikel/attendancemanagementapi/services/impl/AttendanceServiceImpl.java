@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.github.maxiamikel.attendancemanagementapi.dto.request.TicketTransferRequest;
 import com.github.maxiamikel.attendancemanagementapi.entity.Box;
 import com.github.maxiamikel.attendancemanagementapi.entity.Department;
 import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
@@ -17,6 +16,7 @@ import com.github.maxiamikel.attendancemanagementapi.enums.TicketStatus;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.BusinessException;
 import com.github.maxiamikel.attendancemanagementapi.repository.TicketRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.AttendanceService;
+import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
 import com.github.maxiamikel.attendancemanagementapi.services.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +29,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private final TicketRepository ticketRepository;
     private final UserService userService;
+    private final DepartmentService departmentService;
 
     private int MAX_RECALLS = 4;
 
@@ -122,6 +123,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
     public Ticket finalizeTicket(UUID userId) {
 
         User operator = userService.fingById(userId);
@@ -141,6 +143,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
     public Ticket getCurrentTicketTicket(UUID userId) {
 
         User operator = userService.fingById(userId);
@@ -154,14 +157,23 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public Ticket transferTicket(TicketTransferRequest request, UUID userId) {
-        return null;
-    }
+    @Transactional
+    public Ticket transferTicket(UUID departmentId, UUID userId) {
 
-    @Override
-    public Ticket cancelTicket(UUID userId) {
+        User operator = userService.fingById(userId);
+        validateOperator(operator);
+        List<TicketStatus> status = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING);
+        Ticket ticket = ticketRepository.findFirstByBoxAndTicketStatusIn(operator.getBox(), status).orElseThrow(
+                () -> new BusinessException("You dont have any active ticket right now"));
 
-        return null;
+        Department department = departmentService.findById(departmentId);
+        if (department.getName().equals(ticket.getDepartment().getName())) {
+            throw new BusinessException("You cannot transfer to the same department");
+        }
+        ticket.setDepartment(department);
+        updateStatus(ticket, TicketStatus.WAITING);
+
+        return ticketRepository.save(ticket);
     }
 
     @Override
