@@ -31,22 +31,19 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final UserService userService;
     private final DepartmentService departmentService;
 
-    private int MAX_RECALLS = 4;
+    private static final int MAX_RECALLS = 4;
+    private static final List<TicketStatus> ACTIVE_STATUSES = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING);
 
     @Override
     @Transactional
     public Ticket callNextTicket(UUID userId) {
 
-        User operator = userService.fingById(userId);
-
-        validateOperator(operator);
+        User operator = getValidOperator(userId);
         ensureNoActiveTicket(operator);
-
-        UUID departmentId = operator.getDepartment().getId();
 
         Ticket ticket = ticketRepository
                 .callNextTicketAtomic(
-                        departmentId,
+                        operator.getDepartment().getId(),
                         TicketStatus.WAITING.name(),
                         operator.getBox().getId())
                 .orElseThrow(() -> new BusinessException("No tickets available"));
@@ -60,16 +57,12 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Transactional
     public Ticket callNextTicketByPriority(TicketPriority priority, UUID userId) {
 
-        User operator = userService.fingById(userId);
-
-        validateOperator(operator);
+        User operator = getValidOperator(userId);
         ensureNoActiveTicket(operator);
-
-        Department department = operator.getDepartment();
 
         return ticketRepository
                 .callNextTicketByPriority(
-                        department.getId(),
+                        operator.getDepartment().getId(),
                         priority.name(),
                         operator.getBox().getId())
                 .orElseThrow(() -> new BusinessException("No tickets available"));
@@ -79,45 +72,32 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Transactional
     public Ticket recallTicket(UUID userId) {
 
-        User operator = userService.fingById(userId);
-        validateOperator(operator);
-
+        User operator = getValidOperator(userId);
         Ticket ticket = getTicketByBoxAndStatus(operator.getBox(), TicketStatus.CALLED);
 
-        incrementRecallCount(ticket);
+        ticket.setRecallCount(ticket.getRecallCount() + 1);
 
         if (ticket.getRecallCount() >= MAX_RECALLS) {
             updateStatus(ticket, TicketStatus.CANCELLED);
         }
 
-        Ticket cancelled = ticketRepository.save(ticket);
-
         log.info("Ticket {} recalled at box {} for {} times", ticket.getPassCode(), operator.getBox().getBoxNumber(),
-                cancelled.getRecallCount());
+                ticket.getRecallCount());
 
-        return cancelled;
-    }
-
-    private void incrementRecallCount(Ticket ticket) {
-        ticket.setRecallCount(ticket.getRecallCount() + 1);
+        return ticketRepository.save(ticket);
     }
 
     @Override
     @Transactional
     public Ticket startTicket(UUID userId) {
 
-        User operator = userService.fingById(userId);
-
-        validateOperator(operator);
-
-        Box box = operator.getBox();
-
-        Ticket ticket = getTicketByBoxAndStatus(box, TicketStatus.CALLED);
+        User operator = getValidOperator(userId);
+        Ticket ticket = getTicketByBoxAndStatus(operator.getBox(), TicketStatus.CALLED);
 
         updateStatus(ticket, TicketStatus.ATTENDING);
 
         log.info("Ticket {} started attendance at box {}", ticket.getPassCode(),
-                box.getBoxNumber());
+                operator.getBox().getBoxNumber());
 
         return ticketRepository.save(ticket);
     }
@@ -126,33 +106,24 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Transactional
     public Ticket finalizeTicket(UUID userId) {
 
-        User operator = userService.fingById(userId);
-
-        validateOperator(operator);
-
-        Box box = operator.getBox();
-
-        Ticket ticket = getTicketByBoxAndStatus(box, TicketStatus.ATTENDING);
+        User operator = getValidOperator(userId);
+        Ticket ticket = getTicketByBoxAndStatus(operator.getBox(), TicketStatus.ATTENDING);
 
         updateStatus(ticket, TicketStatus.FINALIZED);
 
         log.info("Ticket {} finished attendance at box {}", ticket.getPassCode(),
-                box.getBoxNumber());
+                operator.getBox().getBoxNumber());
 
         return ticketRepository.save(ticket);
     }
 
     @Override
-    @Transactional
     public Ticket getCurrentTicketTicket(UUID userId) {
 
-        User operator = userService.fingById(userId);
-        validateOperator(operator);
-        Box box = operator.getBox();
-        List<TicketStatus> status = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING);
+        User operator = getValidOperator(userId);
 
-        return ticketRepository.findFirstByBoxAndTicketStatusIn(box, status)
-                .orElseThrow(() -> new BusinessException("You dont have any active ticket right now"));
+        return ticketRepository.findFirstByBoxAndTicketStatusIn(operator.getBox(), ACTIVE_STATUSES)
+                .orElseThrow(() -> new BusinessException("No active ticket"));
 
     }
 
@@ -160,11 +131,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Transactional
     public Ticket transferTicket(UUID departmentId, UUID userId) {
 
-        User operator = userService.fingById(userId);
-        validateOperator(operator);
-        List<TicketStatus> status = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING);
-        Ticket ticket = ticketRepository.findFirstByBoxAndTicketStatusIn(operator.getBox(), status).orElseThrow(
-                () -> new BusinessException("You dont have any active ticket right now"));
+        User operator = getValidOperator(userId);
+
+        Ticket ticket = ticketRepository.findFirstByBoxAndTicketStatusIn(operator.getBox(), ACTIVE_STATUSES)
+                .orElseThrow(
+                        () -> new BusinessException("No active ticket"));
 
         Department department = departmentService.findById(departmentId);
         if (department.getName().equals(ticket.getDepartment().getName())) {
@@ -179,15 +150,12 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     public List<Ticket> getTicketsByStatus(UUID userId) {
 
-        User operator = userService.fingById(userId);
-        Department department = operator.getDepartment();
+        User operator = getValidOperator(userId);
 
-        List<Ticket> waittings = ticketRepository.findByDepartmentAndTicketStatusOrderByCreatedAtAsc(department,
+        return ticketRepository.findByDepartmentAndTicketStatusOrderByCreatedAtAsc(
+                operator.getDepartment(),
                 TicketStatus.WAITING);
-        if (waittings.isEmpty()) {
-            throw new BusinessException("No tickets for this department");
-        }
-        return waittings;
+
     }
 
     private Ticket getTicketByBoxAndStatus(Box box, TicketStatus status) {
@@ -197,11 +165,9 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .orElseThrow(() -> new BusinessException("No ticket with status " + status));
     }
 
-    private User validateOperator(User user) {
+    private User getValidOperator(UUID userId) {
 
-        if (user == null) {
-            throw new BusinessException("User cannot accomplish this action");
-        }
+        User user = userService.findById(userId);
 
         if (user.getBox() == null) {
             throw new BusinessException("User does not have a box assigned");

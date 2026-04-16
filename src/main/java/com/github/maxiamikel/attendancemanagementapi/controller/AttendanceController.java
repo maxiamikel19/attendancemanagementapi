@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.response.ApiResponse;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketDetailsResponse;
+import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketResponse;
+import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketPriority;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.CredentialException;
 import com.github.maxiamikel.attendancemanagementapi.mapper.ApiResponseFactory;
@@ -38,9 +40,7 @@ public class AttendanceController {
                         @AuthenticationPrincipal CustomUserDetails user) {
                 var nextTicket = attendanceService.callNextTicket(getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+                return ok(nextTicket);
         }
 
         @PostMapping("/next-by-priority")
@@ -48,9 +48,7 @@ public class AttendanceController {
                         @RequestParam TicketPriority priority, @AuthenticationPrincipal CustomUserDetails user) {
                 var nextTicket = attendanceService.callNextTicketByPriority(priority, getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(nextTicket)));
+                return ok(nextTicket);
         }
 
         @PostMapping("/recall")
@@ -58,9 +56,7 @@ public class AttendanceController {
                         @AuthenticationPrincipal CustomUserDetails user) {
                 var waitted = attendanceService.recallTicket(getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(waitted)));
+                return ok(waitted);
         }
 
         @PostMapping("/start")
@@ -68,9 +64,7 @@ public class AttendanceController {
                         @AuthenticationPrincipal CustomUserDetails user) {
                 var called = attendanceService.startTicket(getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(called)));
+                return ok(called);
         }
 
         @PostMapping("/finalize")
@@ -78,9 +72,7 @@ public class AttendanceController {
                         @AuthenticationPrincipal CustomUserDetails user) {
                 var attended = attendanceService.finalizeTicket(getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
+                return ok(attended);
         }
 
         @GetMapping("/current")
@@ -88,9 +80,7 @@ public class AttendanceController {
                         @AuthenticationPrincipal CustomUserDetails user) {
                 var attended = attendanceService.getCurrentTicketTicket(getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
+                return ok(attended);
         }
 
         @PatchMapping("/transfer/{departmentId}")
@@ -98,9 +88,7 @@ public class AttendanceController {
                         @AuthenticationPrincipal CustomUserDetails user, @PathVariable UUID departmentId) {
                 var attended = attendanceService.transferTicket(departmentId, getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsResponse(attended)));
+                return ok(attended);
         }
 
         @GetMapping("/tickets")
@@ -119,6 +107,16 @@ public class AttendanceController {
                         throw new CredentialException("User not authenticated");
                 }
                 return user.getId();
+        }
+
+        private ResponseEntity<ApiResponse<TicketDetailsResponse>> ok(Ticket ticket) {
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(ApiResponseFactory.success(toResponse(ticket)));
+        }
+
+        private TicketDetailsResponse toResponse(Ticket ticket) {
+                return ticketMapper.toDetailsResponse(ticket);
         }
 
 }
