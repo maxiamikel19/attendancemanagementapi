@@ -14,6 +14,7 @@ import com.github.maxiamikel.attendancemanagementapi.entity.User;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketPriority;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketStatus;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.BusinessException;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.ResourceNotFoundException;
 import com.github.maxiamikel.attendancemanagementapi.repository.TicketRepository;
 import com.github.maxiamikel.attendancemanagementapi.services.AttendanceService;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
@@ -46,7 +47,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                         operator.getDepartment().getId(),
                         TicketStatus.WAITING.name(),
                         operator.getBox().getId())
-                .orElseThrow(() -> new BusinessException("No tickets available"));
+                .orElseThrow(() -> new ResourceNotFoundException("No tickets available"));
 
         log.info("Ticket {} taken by user {}", ticket.getPassCode(), operator.getName());
 
@@ -123,7 +124,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         User operator = getValidOperator(userId);
 
         return ticketRepository.findFirstByBoxAndTicketStatusIn(operator.getBox(), ACTIVE_STATUSES)
-                .orElseThrow(() -> new BusinessException("No active ticket"));
+                .orElseThrow(() -> new ResourceNotFoundException("No active ticket"));
 
     }
 
@@ -133,9 +134,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         User operator = getValidOperator(userId);
 
-        Ticket ticket = ticketRepository.findFirstByBoxAndTicketStatusIn(operator.getBox(), ACTIVE_STATUSES)
+        Ticket ticket = ticketRepository.findFirstByBoxAndTicketStatus(operator.getBox(), TicketStatus.ATTENDING)
                 .orElseThrow(
-                        () -> new BusinessException("No active ticket"));
+                        () -> new ResourceNotFoundException("No active ticket ATTENDING"));
 
         Department department = departmentService.findById(departmentId);
         if (department.getName().equals(ticket.getDepartment().getName())) {
@@ -162,7 +163,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return ticketRepository
                 .findFirstByBoxAndTicketStatus(box, status)
-                .orElseThrow(() -> new BusinessException("No ticket with status " + status));
+                .orElseThrow(() -> new ResourceNotFoundException("No ticket with status " + status));
     }
 
     private User getValidOperator(UUID userId) {
