@@ -1,5 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.services;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.request.BoxRequest;
@@ -12,6 +13,8 @@ public interface BoxService {
     Box findByBoxNumber(String boxNumber);
 
     Box findById(UUID boxId);
+
+    List<Box> findAll();
 
     Box update(BoxRequest request, UUID id);
 

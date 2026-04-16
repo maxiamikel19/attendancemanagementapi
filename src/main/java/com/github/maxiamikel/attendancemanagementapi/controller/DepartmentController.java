@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.maxiamikel.attendancemanagementapi.dto.request.DepartmentRequest;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.ApiResponse;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.DepartmentResponse;
+import com.github.maxiamikel.attendancemanagementapi.entity.Department;
 import com.github.maxiamikel.attendancemanagementapi.mapper.ApiResponseFactory;
 import com.github.maxiamikel.attendancemanagementapi.mapper.DepartmentMapper;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
@@ -37,37 +38,31 @@ public class DepartmentController {
     public ResponseEntity<ApiResponse<DepartmentResponse>> create(@Valid @RequestBody DepartmentRequest request) {
 
         var department = departmentService.create(request);
-        var response = departmentMapper.toResponse(department);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseFactory.created(response));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponseFactory.created(departmentMapper.toResponse(department)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<DepartmentResponse>> update(@Valid @RequestBody DepartmentRequest request,
             @PathVariable UUID id) {
 
-        var department = departmentService.update(request, id);
-        var response = departmentMapper.toResponse(department);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseFactory.success(response));
+        return ok(departmentService.update(request, id));
     }
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<DepartmentResponse>> findByName(@RequestParam("name") String name) {
 
-        var department = departmentService.findByName(name);
-        var response = departmentMapper.toResponse(department);
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseFactory.success(response));
+        return ok(departmentService.findByName(name));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable UUID id) {
 
         departmentService.delete(id);
-        var response = "Success";
 
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseFactory.success(response));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -77,5 +72,13 @@ public class DepartmentController {
         var response = departments.stream().map(departmentMapper::toResponse).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponseFactory.success(response));
+    }
+
+    private ResponseEntity<ApiResponse<DepartmentResponse>> ok(Department department) {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponseFactory.success(toResponse(department)));
+    }
+
+    private DepartmentResponse toResponse(Department department) {
+        return departmentMapper.toResponse(department);
     }
 }

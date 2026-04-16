@@ -1,6 +1,7 @@
 package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,6 +56,11 @@ public class BoxServiceImpl implements BoxService {
     @Override
     public Box findById(UUID boxId) {
         return getById(boxId);
+    }
+
+    @Override
+    public List<Box> findAll() {
+        return boxRepository.findAll();
     }
 
     @Override

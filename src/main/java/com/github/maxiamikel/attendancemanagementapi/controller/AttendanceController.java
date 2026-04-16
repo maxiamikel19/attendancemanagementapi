@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.response.ApiResponse;
 import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketDetailsResponse;
-import com.github.maxiamikel.attendancemanagementapi.dto.response.TicketResponse;
 import com.github.maxiamikel.attendancemanagementapi.entity.Ticket;
 import com.github.maxiamikel.attendancemanagementapi.enums.TicketPriority;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.CredentialException;
