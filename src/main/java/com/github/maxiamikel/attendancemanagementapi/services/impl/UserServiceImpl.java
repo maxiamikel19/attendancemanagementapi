@@ -1,6 +1,7 @@
 package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public User createAccount(UserRequest request) {
+    public User createUser(UserRequest request) {
 
         log.info("Registering user with email: {}", request.getEmail());
 
@@ -71,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public User assignBox(UUID userId, UUID boxId) {
+    public User addBox(UUID userId, UUID boxId) {
         User user = getById(userId);
         Box box = boxService.findById(boxId);
         user.assignBox(box);
@@ -81,7 +82,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public User changeBox(UUID userId, UUID boxId) {
+    public User updateBox(UUID userId, UUID boxId) {
         User user = getById(userId);
         Box newBox = boxService.findById(boxId);
         user.changeBox(newBox);
@@ -118,7 +119,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public User changeRole(UUID userId, UUID roleId) {
+    public User updateRole(UUID userId, UUID roleId) {
         User user = getById(userId);
         Role role = roleService.findById(roleId);
 
@@ -130,7 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public User changeDepartment(UUID userId, UUID departmentId) {
+    public User updateDepartment(UUID userId, UUID departmentId) {
         User user = getById(userId);
         Department department = departmentService.findById(departmentId);
 
@@ -140,8 +141,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User fingById(UUID userId) {
+    public User findById(UUID userId) {
         return getById(userId);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     private void validateUserDoesNotExist(String email) {
