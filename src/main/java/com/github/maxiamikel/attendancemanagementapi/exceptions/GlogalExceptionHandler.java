@@ -58,8 +58,8 @@ public class GlogalExceptionHandler {
     public ResponseEntity<ApiError> handleActiveTicketAlreadyExistsException(AlreadyActiveException ex) {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.builder()
-                .error(ErrorCode.DUPLICATED_ERROR.name())
-                .status(HttpStatus.CONFLICT.value())
+                .error(ErrorCode.BAD_REQUEST_ERROR.name())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(System.currentTimeMillis())
                 .message(ex.getMessage())
                 .build());
@@ -78,8 +78,8 @@ public class GlogalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(BusinessException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()
-                .error(ErrorCode.INTERNAL_SERVER_ERROR.name())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(ErrorCode.BAD_REQUEST_ERROR.name())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(System.currentTimeMillis())
                 .message(ex.getMessage())
                 .build());

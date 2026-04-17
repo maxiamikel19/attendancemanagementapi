@@ -3,7 +3,6 @@ package com.github.maxiamikel.attendancemanagementapi.controller;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,117 +38,111 @@ public class AttendanceController {
         private final AttendanceService attendanceService;
         private final TicketMapper ticketMapper;
 
-        @Operation(summary = "Llamar al siguiente ticket", description = "Obtiene el siguiente ticket disponible segun su prioridad (PRIORITY o NORMAL) y lo marca como CALLED")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no authenticado"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay ticket dispinoble"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Tiene que finilize o atendimiento en curso antes de atender a otro")
+        @Operation(summary = "Llamar siguiente ticket", description = "Obtiene el siguiente ticket disponible (por prioridad automática) y lo marca como CALLED")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ticket llamado correctamente"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Usuario no autenticado"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay tickets disponibles"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Ya existe una atención en curso")
         })
         @PostMapping("/next")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNext(
                         @AuthenticationPrincipal CustomUserDetails user) {
-                var nextTicket = attendanceService.callNextTicket(getUserId(user));
 
-                return ok(nextTicket);
+                return ok(attendanceService.callNextTicket(getUserId(user)));
         }
 
-        @Operation(summary = "Llamar al siguiente ticket", description = "Obtiene el siguiente ticket disponible segun PRIORITY o NORMAL definido por el usuario y lo marca como CALLED")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no authenticado "),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay ticket disponible "),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Tiene que finilize o atendimiento en curso antes de atender a otro")
+        @Operation(summary = "Llamar siguiente ticket por prioridad", description = "Obtiene el siguiente ticket filtrado por prioridad (PRIORITY o NORMAL)")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ticket llamado"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Prioridad inválida"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay tickets disponibles")
         })
         @PostMapping("/next-by-priority")
-        public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNextTicketByPriority(
-                        @Parameter(description = "Priodidad del Ticket", example = "PRIORITY") @RequestParam TicketPriority priority,
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> callNextByPriority(
+                        @Parameter(description = "Prioridad del ticket", example = "PRIORITY") @RequestParam TicketPriority priority,
                         @AuthenticationPrincipal CustomUserDetails user) {
-                var nextTicket = attendanceService.callNextTicketByPriority(priority, getUserId(user));
 
-                return ok(nextTicket);
+                return ok(attendanceService.callNextTicketByPriority(priority, getUserId(user)));
         }
 
-        @Operation(summary = "Re-Llamar a un ticket llamado", description = "Llamar nuevamente a un ticket que fue lladado(CALLED) hasta 4 veces y lo marca como CANCELLED")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK. Devuelve el ticket llamado y incrementa su recallcount+=1"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No encontrar ticket con TicketStatus CALLED"),
+        @Operation(summary = "Re-llamar ticket", description = "Re-llama un ticket en estado CALLED. Máximo 4 intentos antes de cancelarlo automáticamente.")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ticket re-llamado"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe ticket en estado CALLED"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Límite de re-llamadas alcanzado")
         })
         @PostMapping("/recall")
-        public ResponseEntity<ApiResponse<TicketDetailsResponse>> recallTicket(
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> recall(
                         @AuthenticationPrincipal CustomUserDetails user) {
-                var waitted = attendanceService.recallTicket(getUserId(user));
 
-                return ok(waitted);
+                return ok(attendanceService.recallTicket(getUserId(user)));
         }
 
-        @Operation(summary = "Iniciar una atención", description = "Iniciar la atención de un ticket CALLED y lo cambia el TicketStatus a ATTENDING")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK. Devuelve el ticket ATTENDING"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No encontrar ticket con TicketStatus CALLED"),
+        @Operation(summary = "Iniciar atención", description = "Cambia el ticket de CALLED a ATTENDING")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Atención iniciada"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay ticket en estado CALLED"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Estado inválido")
         })
         @PostMapping("/start")
-        public ResponseEntity<ApiResponse<TicketDetailsResponse>> startTicket(
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> start(
                         @AuthenticationPrincipal CustomUserDetails user) {
-                var called = attendanceService.startTicket(getUserId(user));
 
-                return ok(called);
+                return ok(attendanceService.startTicket(getUserId(user)));
         }
 
-        @Operation(summary = "Terminar una atención", description = "Terminar la atención de un ticket ATTENDING y lo cambia el TicketStatus a FINALIZED")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK. Devuelve el ticket FINALIZED"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No encontrar ticket con TicketStatus ATTENDING"),
+        @Operation(summary = "Finalizar atención", description = "Cambia el ticket de ATTENDING a FINALIZED")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Atención finalizada"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay ticket en atención"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Estado inválido")
         })
         @PostMapping("/finalize")
         public ResponseEntity<ApiResponse<TicketDetailsResponse>> finalizeTicket(
                         @AuthenticationPrincipal CustomUserDetails user) {
-                var attended = attendanceService.finalizeTicket(getUserId(user));
 
-                return ok(attended);
+                return ok(attendanceService.finalizeTicket(getUserId(user)));
         }
 
-        @Operation(summary = "Encontrar la actual atencion", description = "Devuelve el actual ticket en atencion,sea con Ticketstatus CALLED, ATTENDING")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK. Devuelve el ticket ATTENDING"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No encontrar ningun ticket activo sea CALLED o ATTENDING"),
+        @Operation(summary = "Obtener ticket actual", description = "Devuelve el ticket actual en estado CALLED o ATTENDING")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ticket actual"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No hay ticket activo")
         })
         @GetMapping("/current")
-        public ResponseEntity<ApiResponse<TicketDetailsResponse>> getCurrentTicketTicket(
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> current(
                         @AuthenticationPrincipal CustomUserDetails user) {
-                var attended = attendanceService.getCurrentTicketTicket(getUserId(user));
 
-                return ok(attended);
+                return ok(attendanceService.getCurrentTicketTicket(getUserId(user)));
         }
 
-        @Operation(summary = "Transferir una atención a otro departamento", description = "Hace la transferencia de un ticket generado para un Department equivocado al su correcto Department para su atención")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK. Devuelve el ticket con TicketStatus ATTENDING a WAITING y cambia el departamento para su atención "),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No encontrar ticket activo con TicketStatus ATTENDING"),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "No se poede transferir una atención al mismo department")
+        @Operation(summary = "Transferir ticket", description = "Transfiere un ticket en atención a otro departamento")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ticket transferido"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Departamento inválido"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "No se puede transferir al mismo departamento")
         })
-        @PatchMapping("/transfer/{departmentId}")
-        public ResponseEntity<ApiResponse<TicketDetailsResponse>> transferTicket(
-                        @Parameter(description = "departmentId", example = "0fc357c3-c548-430c-af20-65dd9febff34") @AuthenticationPrincipal CustomUserDetails user,
-                        @PathVariable UUID departmentId) {
-                var attended = attendanceService.transferTicket(departmentId, getUserId(user));
+        @PostMapping("/transfer/{departmentId}")
+        public ResponseEntity<ApiResponse<TicketDetailsResponse>> transfer(
+                        @PathVariable UUID departmentId,
+                        @AuthenticationPrincipal CustomUserDetails user) {
 
-                return ok(attended);
+                return ok(attendanceService.transferTicket(departmentId, getUserId(user)));
         }
 
-        @Operation(summary = "Lista la fila de espera por department", description = "Listar los Tickets en espera (WAITING) del departemento al que pertenece el usuario logado")
-        @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "OK.Devuelve la lista vacía o con las atenciones en espere (WAITING) ")
+        @Operation(summary = "Listar tickets en espera", description = "Lista los tickets en estado WAITING del departamento del usuario")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lista de tickets")
         })
-        @GetMapping("/tickets")
-        public ResponseEntity<ApiResponse<List<TicketDetailsResponse>>> getAllWaitingAttendencesForDepartment(
+        @GetMapping("/waiting")
+        public ResponseEntity<ApiResponse<List<TicketDetailsResponse>>> waiting(
                         @AuthenticationPrincipal CustomUserDetails user) {
 
                 var tickets = attendanceService.getTicketsByStatus(getUserId(user));
 
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(ticketMapper.toDetailsList(tickets)));
+                return ResponseEntity.ok(
+                                ApiResponseFactory.success(ticketMapper.toDetailsList(tickets)));
         }
 
         private UUID getUserId(CustomUserDetails user) {
@@ -160,13 +153,7 @@ public class AttendanceController {
         }
 
         private ResponseEntity<ApiResponse<TicketDetailsResponse>> ok(Ticket ticket) {
-                return ResponseEntity
-                                .status(HttpStatus.OK)
-                                .body(ApiResponseFactory.success(toResponse(ticket)));
+                return ResponseEntity.ok(
+                                ApiResponseFactory.success(ticketMapper.toDetailsResponse(ticket)));
         }
-
-        private TicketDetailsResponse toResponse(Ticket ticket) {
-                return ticketMapper.toDetailsResponse(ticket);
-        }
-
 }

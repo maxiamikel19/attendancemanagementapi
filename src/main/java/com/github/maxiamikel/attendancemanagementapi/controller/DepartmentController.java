@@ -23,17 +23,27 @@ import com.github.maxiamikel.attendancemanagementapi.mapper.ApiResponseFactory;
 import com.github.maxiamikel.attendancemanagementapi.mapper.DepartmentMapper;
 import com.github.maxiamikel.attendancemanagementapi.services.DepartmentService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/v1/departments")
 @RequiredArgsConstructor
+@Tag(name = "Departments", description = "Gestión de departamentos")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
     private final DepartmentMapper departmentMapper;
 
+    @Operation(summary = "Crear un departamento", description = "Crea un nuevo departamento en el sistema")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Departamento creado correctamente"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Conflicto de duplicado")
+    })
     @PostMapping
     public ResponseEntity<ApiResponse<DepartmentResponse>> create(@Valid @RequestBody DepartmentRequest request) {
 
@@ -44,6 +54,13 @@ public class DepartmentController {
                 .body(ApiResponseFactory.created(departmentMapper.toResponse(department)));
     }
 
+    @Operation(summary = "Actualizar un departamento", description = "Actualiza un departamento existente por su ID")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Departamento actualizado correctamente"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Departamento no encontrado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Conflicto de duplicado")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<DepartmentResponse>> update(@Valid @RequestBody DepartmentRequest request,
             @PathVariable UUID id) {
@@ -51,12 +68,23 @@ public class DepartmentController {
         return ok(departmentService.update(request, id));
     }
 
-    @GetMapping("/search")
+    @Operation(summary = "Buscar departamento por nombre", description = "Obtiene un departamento basado en su nombre")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Departamento encontrado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Departamento no encontrado")
+    })
+    @GetMapping("/by-name")
     public ResponseEntity<ApiResponse<DepartmentResponse>> findByName(@RequestParam("name") String name) {
 
         return ok(departmentService.findByName(name));
     }
 
+    @Operation(summary = "Eliminar un departamento", description = "Elimina un departamento por su ID")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Departamento creado correctamente"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Departamento no encontrado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Departamento no se puede eliminar al tener alguno usuario relacionado")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable UUID id) {
 
@@ -65,6 +93,10 @@ public class DepartmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Listar todos los departamentos", description = "Obtiene una lista de todos los departamentos")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listar los departamentos del sistema o la lista vacía")
+    })
     @GetMapping
     public ResponseEntity<ApiResponse<List<DepartmentResponse>>> findAll() {
 

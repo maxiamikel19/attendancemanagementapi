@@ -22,19 +22,32 @@ import com.github.maxiamikel.attendancemanagementapi.mapper.ApiResponseFactory;
 import com.github.maxiamikel.attendancemanagementapi.mapper.BoxMapper;
 import com.github.maxiamikel.attendancemanagementapi.services.BoxService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/v1/boxes")
 @RequiredArgsConstructor
+@Tag(name = "Boxes", description = "Gestión de boxs o cajas o puntos de atención")
 public class BoxController {
 
     private final BoxService boxService;
     private final BoxMapper boxMapper;
 
+    @Operation(summary = "Crear una nueva caja o box o punto")
+    @ApiResponses(value = {
+
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Caja creada correctamente"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Error interno")
+    })
     @PostMapping
-    public ResponseEntity<ApiResponse<BoxResponse>> create(@Valid @RequestBody BoxRequest request) {
+    public ResponseEntity<ApiResponse<BoxResponse>> create(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Datos del box", required = true) @Valid @RequestBody BoxRequest request) {
 
         var box = boxService.create(request);
         return ResponseEntity
@@ -42,12 +55,22 @@ public class BoxController {
                 .body(ApiResponseFactory.created(boxMapper.toResponse(box)));
     }
 
+    @Operation(summary = "Buscar box por número")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Box encontrado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Box no encontrado")
+    })
     @GetMapping("/{boxNumber}")
-    public ResponseEntity<ApiResponse<BoxResponse>> findByBoxNumber(@PathVariable String boxNumber) {
+    public ResponseEntity<ApiResponse<BoxResponse>> findByBoxNumber(
+            @Parameter(description = "Número del box", required = true, example = "B-02") @PathVariable String boxNumber) {
 
         return ok(boxService.findByBoxNumber(boxNumber));
     }
 
+    @Operation(summary = "Listar todos los boxes")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Boxex encontrados o lista vacia")
+    })
     @GetMapping
     public ResponseEntity<ApiResponse<List<BoxResponse>>> findAll() {
 
@@ -59,13 +82,27 @@ public class BoxController {
                 ApiResponseFactory.success(boxes));
     }
 
+    @Operation(summary = "Actualizar un box")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "20o", description = "Box actualizado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Box no encontrado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Datos duplicados")
+
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<BoxResponse>> update(@Valid @RequestBody BoxRequest request,
-            @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<BoxResponse>> update(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Datos de actualización del box", required = true) @Valid @RequestBody BoxRequest request,
+            @Parameter(description = "ID del box", required = true) @PathVariable UUID id) {
 
         return ok(boxService.update(request, id));
     }
 
+    @Operation(summary = "Eliminar un box")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Box eliminado"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Box no encontrado")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable UUID id) {
 

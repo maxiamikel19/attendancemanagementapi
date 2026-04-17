@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.maxiamikel.attendancemanagementapi.dto.request.DepartmentRequest;
 import com.github.maxiamikel.attendancemanagementapi.entity.Department;
+import com.github.maxiamikel.attendancemanagementapi.exceptions.BusinessException;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.DuplicatedResourceException;
 import com.github.maxiamikel.attendancemanagementapi.exceptions.ResourceNotFoundException;
 import com.github.maxiamikel.attendancemanagementapi.repository.DepartmentRepository;
@@ -85,6 +86,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         Department department = getById(id);
 
         log.info("Deleting department with id: {}", id);
+        if (!department.getUsers().isEmpty()) {
+            throw new BusinessException("Department cannot be deleted due has relacionated users");
+        }
 
         departmentRepository.delete(department);
     }
