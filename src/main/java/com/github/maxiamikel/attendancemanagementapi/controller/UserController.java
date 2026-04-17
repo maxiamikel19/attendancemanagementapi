@@ -126,7 +126,7 @@ public class UserController {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Caja removida"),
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario no encontrado")
         })
-        @PutMapping("/{userId}/box")
+        @DeleteMapping("/{userId}/box")
         public ResponseEntity<ApiResponse<UserResponse>> removeBox(@PathVariable("userId") UUID userId) {
 
                 return ok(userService.removeBox(userId));
