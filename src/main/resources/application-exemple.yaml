@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: attendancemanagementapi
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/database-name
+    username: user-name
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: sender-email
+    password: sender-email-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls: 
+            enable: true
+            required: true
+
+api:  
+  base: 
+   url: http://localhost:8080
+  jwt-secret: api-secret-key
+  jwt-expiration: token-expiration
+  jwt-issuer: api-issuer
