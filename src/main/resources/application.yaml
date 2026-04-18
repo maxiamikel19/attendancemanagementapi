@@ -3,9 +3,9 @@ spring:
     name: attendancemanagementapi
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/attendance_db
-    username: dev
-    password: secret1234
+    url: jdbc:postgresql://dpg-d7hd0h6gvqtc738k0dfg-a.oregon-postgres.render.com:5432/attendancedata #localhost:5433/attendance_db
+    username: attendancedata_user #dev
+    password: GWyQ9Y27JcWAWv2jYKQuk0lWr5MwDIdl #secret1234
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -37,3 +37,7 @@ api:
   jwt-secret: mysuperlongsecuresecretkeythatshouldbeatleast64characterslong123456
   jwt-expiration: 2592000000
   jwt-issuer: ticket-api-issuer
+
+server:
+  port: 8080
+  forward-headers-strategy: framework

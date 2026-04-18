@@ -34,3 +34,5 @@ build/
 
 ## API ##
 application.yaml
+database-info.txt
+target/
