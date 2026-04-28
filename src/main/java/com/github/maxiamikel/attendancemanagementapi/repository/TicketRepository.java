@@ -1,5 +1,6 @@
 package com.github.maxiamikel.attendancemanagementapi.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,7 +77,21 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     List<Ticket> findTop10ByTicketStatusOrderByLastUpdateAsc(TicketStatus status);
 
-    List<Ticket> findTop5ByTicketStatusInOrderByLastUpdateDesc(List<TicketStatus> status);
+    List<Ticket> findTop10ByTicketStatusAndLastUpdateBetweenOrderByLastUpdateAsc(
+            TicketStatus status,
+            LocalDateTime startOfDay,
+            LocalDateTime endOfDay);
+
+    // List<Ticket> findTop5ByTicketStatusInOrderByLastUpdateDesc(List<TicketStatus>
+    // status);
+    // List<Ticket>
+    // findTop5ByTicketStatusAndCreatedAtInOrderByLastUpdateDesc(List<TicketStatus>
+    // status);
+
+    List<Ticket> findTop5ByTicketStatusInAndLastUpdateBetweenOrderByLastUpdateDesc(
+            List<TicketStatus> status,
+            LocalDateTime startOfDay,
+            LocalDateTime endOfDay);
 
     Optional<Ticket> findTop1ByTicketStatusOrderByLastUpdateDesc(TicketStatus called);
 }

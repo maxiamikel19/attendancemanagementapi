@@ -1,5 +1,8 @@
 package com.github.maxiamikel.attendancemanagementapi.services.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -16,29 +19,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AttendanceDashboardServiceImpl implements AttendanceDashboardService {
 
-    private final TicketRepository ticketRepository;
-    private final TicketMapper ticketMapper;
+        private final TicketRepository ticketRepository;
+        private final TicketMapper ticketMapper;
 
-    @Override
-    public AttendanceDashboardResponse getDashboard() {
+        @Override
+        public AttendanceDashboardResponse getDashboard() {
 
-        List<TicketStatus> statusIn = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING, TicketStatus.CANCELLED,
-                TicketStatus.FINALIZED);
+                List<TicketStatus> statusIn = List.of(TicketStatus.CALLED, TicketStatus.ATTENDING,
+                                TicketStatus.CANCELLED,
+                                TicketStatus.FINALIZED);
 
-        var waiting = ticketRepository
-                .findTop10ByTicketStatusOrderByLastUpdateAsc(TicketStatus.WAITING);
+                LocalDate today = LocalDate.now();
+                LocalDateTime startDay = today.atStartOfDay();
+                LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
-        var recentCalled = ticketRepository
-                .findTop5ByTicketStatusInOrderByLastUpdateDesc(statusIn);
+                var waiting = ticketRepository
+                                .findTop10ByTicketStatusOrderByLastUpdateAsc(TicketStatus.WAITING);
 
-        var current = ticketRepository
-                .findTop1ByTicketStatusOrderByLastUpdateDesc(TicketStatus.CALLED);
+                var recentCalled = ticketRepository.findTop5ByTicketStatusInAndLastUpdateBetweenOrderByLastUpdateDesc(
+                                statusIn,
+                                startDay, endOfDay);
 
-        return AttendanceDashboardResponse.builder()
-                .current(current.map(ticketMapper::toDetailsResponse).orElse(null))
-                .recentCalled(ticketMapper.toDetailsList(recentCalled))
-                .waiting(ticketMapper.toDetailsList(waiting))
-                .build();
-    }
+                var current = ticketRepository
+                                .findTop1ByTicketStatusOrderByLastUpdateDesc(TicketStatus.CALLED);
+
+                return AttendanceDashboardResponse.builder()
+                                .current(current.map(ticketMapper::toDetailsResponse).orElse(null))
+                                .recentCalled(ticketMapper.toDetailsList(recentCalled))
+                                .waiting(ticketMapper.toDetailsList(waiting))
+                                .build();
+        }
 
 }
